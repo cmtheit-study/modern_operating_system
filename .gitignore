@@ -1,0 +1,7 @@
+.idea
+.vscode
+.DS_Store
+cmake-build-debug
+bin
+*.class
+*.o
