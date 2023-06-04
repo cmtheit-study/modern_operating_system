@@ -9,6 +9,6 @@ int main(int argc, char * argv[]) {
 	printf("&st = 0x%x, &st2 = 0x%x\n", (unsigned)&st, (unsigned)&st2);
 	void * heap = malloc(1);
 	printf("&heap = 0x%x\n", (unsigned)heap);
-// 	main(argc, argv);
+// 	main.c(argc, argv);
 	return 0;
 }
