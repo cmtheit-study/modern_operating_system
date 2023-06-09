@@ -1,0 +1,52 @@
+%!TEX program = xelatex
+\documentclass{article}  
+\usepackage[UTF8]{ctex}  
+\usepackage{siunitx}
+
+\title{解题过程}
+\author{程闽}
+
+\begin{document}  
+	\maketitle
+
+	每个盘面共有
+	$$
+	tot = 2^{9} \times (160 + 200 + 240 + 280)\SI{}{\byte}
+	$$
+	故总容量大小为
+	$$
+	T = tot \times 16 = 7208960 \SI{}{\byte}
+	$$
+	在时间$\SI{1}{\milli\sec}$之内磁盘会旋转
+	$$rot = \frac{7200 \times 360 \div 60}{1000}\SI{}{\degree} = \SI{43.2}{\degree}$$ 
+	各环带每个扇区分别需要旋转的度数为：
+	$$
+		rot1 = \frac{360}{160}\SI{}{\degree} = \SI{2.25}{\degree}
+	$$
+	$$
+		rot2 = \frac{360}{200}\SI{}{\degree} = \SI{1.8}{\degree}
+	$$	
+	$$
+		rot3 = \frac{360}{240}\SI{}{\degree} = \SI{1.5}{\degree}
+	$$
+	$$
+		rot4 = \frac{360}{280}\SI{}{\degree} = \SI{1.286}{\degree}
+	$$
+	则最优磁盘斜进分别为：
+	$$
+	skew1 = \frac{rot}{rot1} = 19.2
+	$$
+	$$
+	skew2 = \frac{rot}{rot2}= 24
+	$$	
+	$$
+	skew3 = \frac{rot}{rot3} = 28.8
+	$$
+	$$
+	skew4 = \frac{rot}{rot4} = 33.6
+	$$
+	最大数据率为：
+	$$
+	rate = (7200 \div 60) \times 280 \times 2^{9} \SI{}{\byte\per\sec} = \SI{17203200}{\byte\per\sec} 
+	$$
+\end{document}

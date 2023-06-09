@@ -1,0 +1,15 @@
+div {
+    width: 20%;
+    display: none;
+    count: 10;
+    @click: {
+        ../count += 1;
+    }
+    div {
+        width: 10%
+        ok
+        Button {
+            Welcome to wakoo!
+        }
+    }
+}
