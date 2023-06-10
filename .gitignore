@@ -3,7 +3,6 @@
 .DS_Store
 cmake-build-debug
 target
-bin
 *.class
 *.o
 main
