@@ -27,6 +27,12 @@ impl<'a, T> Res<'a, T> {
         self.requested.push(proc);
     }
 
+    pub(crate) fn if_requested(&'a self, pid: <Proc<'a, T> as HasId>::IdType) -> bool {
+        self.requested.iter().any(|p| {
+            p.get_id() == pid
+        })
+    }
+
      pub(crate) fn detect_circle(&'a self,
                                 proc_detected: &mut Vec<&Proc<'a, T>>,
                                 res_detected: &mut Vec<&Res<'a, T>>) -> bool {

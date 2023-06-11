@@ -1,9 +1,7 @@
-use std::cell::RefCell;
 use crate::proc::{Proc};
 use crate::res::Res;
-use std::sync::Arc;
 use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
+use std::hash::{Hash};
 
 mod res;
 mod proc;
@@ -25,7 +23,6 @@ pub struct Runtime<'a> {
 }
 
 pub type ReqResResult = Result<i32, ReqErrCode>;
-
 #[derive(Debug, PartialOrd, PartialEq, Eq)]
 pub enum ReqErrCode {
     ProcNotFound,
@@ -33,6 +30,15 @@ pub enum ReqErrCode {
     DeadLockDetected,
     ResOccupied,
     ProcHasRes
+}
+
+pub type ReleaseResResult = Result<i32, ReleaseResErrCode>;
+#[derive(Debug, PartialOrd, PartialEq, Eq)]
+pub enum ReleaseResErrCode {
+    ProcNotFound,
+    ResNotFound,
+    ProcNotOwnRes,
+    ResNotOwned
 }
 
 impl<'a> Runtime<'a> {
@@ -97,6 +103,38 @@ impl<'a> Runtime<'a> {
         }
     }
 
+    pub unsafe fn release_res(
+        me: * mut Self,
+        pid: <Proc<'_, Data> as HasId>::IdType,
+        rid: <Res<'_, Data> as HasId>::IdType
+    ) -> ReleaseResResult {
+        return if let Some(p) = (*me).proc.get_mut(&pid) {
+            if let Some(r) = (*me).res.get_mut(&rid) {
+                if let Some((_, owner)) = (*me).proc.iter_mut().find(|(_, p)| {
+                    p.if_own_res(rid)
+                }) {
+                    if owner.get_id() == p.get_id() {
+                        owner.release(r);
+                        if let Some((_, rp)) = (*me).proc.iter_mut().find(|(pid, _)| {
+                            r.if_requested(**pid)
+                        }) {
+                            rp.own(r);
+                        }
+                        Ok(0)
+                    } else {
+                        Err(ReleaseResErrCode::ProcNotOwnRes)
+                    }
+                } else {
+                    Err(ReleaseResErrCode::ResNotOwned)
+                }
+            } else {
+                Err(ReleaseResErrCode::ResNotFound)
+            }
+        } else {
+            Err(ReleaseResErrCode::ProcNotFound)
+        }
+    }
+
     pub unsafe fn request_report(
         me: * mut Self,
         pid: <Proc<'_, Data> as HasId>::IdType,
@@ -126,6 +164,37 @@ impl<'a> Runtime<'a> {
                     }
                 }
                 println!("，{} 对资源 {} 的请求失败", pid, rid);
+            }
+        }
+        res
+    }
+
+    pub unsafe fn release_report(
+        me: * mut Self,
+        pid: <Proc<'_, Data> as HasId>::IdType,
+        rid: <Res<'_, Data> as HasId>::IdType,
+    ) -> ReleaseResResult {
+        let res = Self::release_res(me, pid, rid);
+        match &res {
+            Ok(_) => {
+                println!("进程 {} 对资源 {} 释放成功", pid, rid);
+            }
+            Err(code) => {
+                match code {
+                    ReleaseResErrCode::ProcNotFound => {
+                        print!("进程不存在");
+                    }
+                    ReleaseResErrCode::ResNotFound => {
+                        print!("资源不存在")
+                    }
+                    ReleaseResErrCode::ProcNotOwnRes => {
+                        print!("进程不持有资源")
+                    }
+                    ReleaseResErrCode::ResNotOwned => {
+                        print!("资源未被持有")
+                    }
+                }
+                println!("，进程 {} 对资源 {} 释放失败", pid, rid);
             }
         }
         res

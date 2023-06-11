@@ -25,6 +25,19 @@ impl<'a, T> Proc<'a, T> {
         self.owned.push(res);
     }
 
+    pub(crate) fn release(&'a mut self, res: &'a Res<'a, T>) {
+        let mut remove_idx: i32 = -1;
+        for r_idx in 0..self.owned.len() {
+            if self.owned[r_idx].get_id() == res.get_id() {
+                remove_idx = r_idx as i32;
+                break;
+            }
+        }
+        if remove_idx >= 0 {
+            self.owned.remove(remove_idx as usize);
+        }
+    }
+
     pub(crate) fn if_own_res(&'a self, rid: <Res<'a, T> as HasId>::IdType) -> bool {
         self.owned.iter().any(|r| {
             r.get_id() == rid
