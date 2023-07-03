@@ -1,0 +1,1 @@
+paste -d '' t1.txt t2.txt
